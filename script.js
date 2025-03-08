@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     const videoList = document.getElementById("video-list");
     const searchInput = document.getElementById("search-input");
+    const searchButton = document.getElementById("search-button");
     const uploadButton = document.getElementById("upload-button");
     
     let videos = [
@@ -26,11 +27,20 @@ document.addEventListener("DOMContentLoaded", function() {
         displayVideos(videos);
     }, 2000); // Simulating load time
 
-    // Search functionality
-    searchInput.addEventListener("input", () => {
+    function searchVideos() {
         const searchTerm = searchInput.value.toLowerCase();
         const filteredVideos = videos.filter(video => video.title.toLowerCase().includes(searchTerm));
         displayVideos(filteredVideos);
+    }
+
+    // Search button click event
+    searchButton.addEventListener("click", searchVideos);
+    
+    // Search when pressing Enter
+    searchInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            searchVideos();
+        }
     });
 
     // Upload functionality (simple prompt for now)

@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const videoItem = document.createElement("div");
             videoItem.classList.add("bg-white", "p-2", "rounded", "shadow");
             videoItem.innerHTML = `
-                <iframe src="${video.url}" frameborder="0" allowfullscreen class="w-full rounded"></iframe>
+                <iframe src="${video.url}" frameborder="0" allowfullscreen class="w-full h-60 rounded"></iframe>
                 <p class="mt-2 font-semibold">${video.title}</p>
             `;
             videoList.appendChild(videoItem);

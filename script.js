@@ -4,9 +4,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const uploadButton = document.getElementById("upload-button");
     
     let videos = [
-        { title: "EARTH 4K - Relaxation Film - Peaceful Relaxing Music - Nature 4k Video UltraHD - OUR PLANET", url: "https://youtu.be/KJwYBJMSbPI?si=Okx96yGqh1TokJHw" },
-        { title: "I Tried Shark Tank Products !", url: "https://youtu.be/hhbaKxU0D-U?si=jZJw7DGZsisDHm8X" },
-        { title: "You Play This Game With Your Voice ⭐⭐", url: "https://youtu.be/ueWPNOsBO44?si=juaBpPelrzGazQuM" }
+        { title: "EARTH 4K - Relaxation Film - Peaceful Relaxing Music - Nature 4k Video UltraHD - OUR PLANET", url: "https://www.youtube.com/embed/KJwYBJMSbPI" },
+        { title: "I Tried Shark Tank Products !", url: "https://www.youtube.com/embed/hhbaKxU0D-U" },
+        { title: "You Play This Game With Your Voice ⭐⭐", url: "https://www.youtube.com/embed/ueWPNOsBO44" }
     ];
     
     function displayVideos(filteredVideos) {
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const videoItem = document.createElement("div");
             videoItem.classList.add("bg-white", "p-2", "rounded", "shadow");
             videoItem.innerHTML = `
-                <video src="${video.url}" controls class="w-full rounded"></video>
+                <iframe src="${video.url}" frameborder="0" allowfullscreen class="w-full rounded"></iframe>
                 <p class="mt-2 font-semibold">${video.title}</p>
             `;
             videoList.appendChild(videoItem);
@@ -36,9 +36,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // Upload functionality (simple prompt for now)
     uploadButton.addEventListener("click", () => {
         const videoTitle = prompt("Enter video title:");
-        const videoUrl = prompt("Enter video URL:");
+        const videoUrl = prompt("Enter YouTube Video ID (e.g., dQw4w9WgXcQ):");
         if (videoTitle && videoUrl) {
-            videos.push({ title: videoTitle, url: videoUrl });
+            videos.push({ title: videoTitle, url: `https://www.youtube.com/embed/${videoUrl}` });
             displayVideos(videos);
         }
     });

@@ -136,65 +136,64 @@
       z-index: 10;
     }
 
-/* Desktop Navigation Styles */
-.nav-desktop {
-  display: flex;
-  flex-direction: column;
-  background-color: #f0f0f0;
-  padding: 20px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 250px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-}
+    /* Desktop Navigation Styles */
+    .nav-desktop {
+      display: flex;
+      flex-direction: column;
+      background-color: #f0f0f0;
+      padding: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 250px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      transition: width 0.3s ease;
+    }
 
-/* Collapsed sidebar style */
-.nav-desktop.collapsed {
-  width: 50px; /* Only show small icons */
-  padding: 10px;
-}
+    /* Collapsed sidebar style */
+    .nav-desktop.collapsed {
+      width: 50px; /* Only show small icons */
+      padding: 10px;
+    }
 
-.nav-desktop a {
-  padding: 10px;
-  color: #333;
-  text-decoration: none;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-}
+    .nav-desktop a {
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
 
-.nav-desktop a:hover {
-  background-color: #ddd;
-}
+    .nav-desktop a:hover {
+      background-color: #ddd;
+    }
 
-/* Hide text when collapsed */
-.nav-desktop.collapsed .nav-text {
-  display: none;
-}
+    /* Hide text when collapsed */
+    .nav-desktop.collapsed .nav-text {
+      display: none;
+    }
 
-/* Ensure icons are always visible */
-.nav-desktop .nav-icon {
-  font-size: 24px;
-  margin-right: 10px;
-}
+    /* Ensure icons are always visible */
+    .nav-desktop .nav-icon {
+      font-size: 24px;
+      margin-right: 10px;
+    }
 
-.nav-desktop .nav-text {
-  flex-grow: 1;
-}
+    .nav-desktop .nav-text {
+      flex-grow: 1;
+    }
 
-/* Toggle button */
-.nav-desktop .toggle-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 25px;
-  cursor: pointer;
-  z-index: 20;
-}
-
+    /* Toggle button */
+    .nav-desktop .toggle-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 25px;
+      cursor: pointer;
+      z-index: 20;
+    }
 
     .nav-desktop .toggle-btn:hover {
       color: red;
@@ -272,6 +271,7 @@
   <script>
     const API_KEY = "AIzaSyC8nKOJX6eDi8v1kKma79F9GxfilpvYclI"; // Replace this with your actual API key
     let nextPageToken = '';
+    let likedVideos = JSON.parse(localStorage.getItem('likedVideos')) || [];
 
     async function searchYouTube() {
       const query = document.getElementById("searchInput").value.trim();

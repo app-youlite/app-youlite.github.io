@@ -268,84 +268,133 @@
     <a href="#">You</a>
   </div>
 
-  <script>
-    const API_KEY = "AIzaSyC8nKOJX6eDi8v1kKma79F9GxfilpvYclI"; // Replace this with your actual API key
-    let nextPageToken = '';
-    let likedVideos = JSON.parse(localStorage.getItem('likedVideos')) || [];
+<script>
+  const API_KEY = "AIzaSyC8nKOJX6eDi8v1kKma79F9GxfilpvYclI";
+  let nextPageToken = '';
 
-    async function searchYouTube() {
-      const query = document.getElementById("searchInput").value.trim();
-      if (!query) return;
+  async function searchYouTube() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) return;
 
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&q=${encodeURIComponent(query)}&key=${API_KEY}&pageToken=${nextPageToken}`;
+    // First: Try to find a matching channel
+    const channelSearchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+    const channelRes = await fetch(channelSearchUrl);
+    const channelData = await channelRes.json();
 
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
+    if (channelData.items && channelData.items.length > 0) {
+      const channel = channelData.items[0];
+      const channelTitle = channel.snippet.title.toLowerCase();
+      const searchQuery = query.toLowerCase();
 
-        const resultsContainer = document.getElementById("results");
-        resultsContainer.innerHTML = "";
-
-        if (!data.items.length) {
-          resultsContainer.innerHTML = "<p>No results found.</p>";
-          return;
-        }
-
-        data.items.forEach(item => {
-          const videoId = item.id.videoId;
-          const title = item.snippet.title;
-          const thumbnailUrl = item.snippet.thumbnails.medium.url;
-          const isShort = item.snippet.title.toLowerCase().includes('short'); // Check if the title includes 'short'
-
-          const videoElement = `
-            <div class="video" onclick="openModal('${videoId}')">
-              ${isShort ? '<div class="short-label">Short</div>' : ''}
-              <img src="${thumbnailUrl}" alt="${title}">
-              <h4>${title}</h4>
-            </div>
-          `;
-          resultsContainer.innerHTML += videoElement;
-        });
-
-        // Store the next page token to fetch more results later
-        nextPageToken = data.nextPageToken || '';
-
-      } catch (error) {
-        console.error("Error fetching YouTube data:", error);
-        document.getElementById("results").innerHTML = "<p>There was an error loading videos.</p>";
+      // If the input exactly matches the channel name
+      if (channelTitle === searchQuery) {
+        const channelId = channel.id.channelId;
+        displayChannelVideos(channelId, channel.snippet.title);
+        return;
       }
     }
 
-    // Open Modal with YouTube video
-    function openModal(videoId) {
-      const videoFrame = document.getElementById("videoFrame");
-      videoFrame.src = `https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0`;
-      document.getElementById("videoModal").style.display = "flex";
-    }
+    // Otherwise, do a normal search
+    normalSearch(query);
+  }
 
-    // Close Modal
-    function closeModal() {
-      document.getElementById("videoModal").style.display = "none";
-      const videoFrame = document.getElementById("videoFrame");
-      videoFrame.src = "";  // Stop the video when the modal closes
-    }
+  async function normalSearch(query) {
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&q=${encodeURIComponent(query)}&key=${API_KEY}&pageToken=${nextPageToken}`;
 
-    // Toggle the sidebar (desktop navigation)
-    function toggleNav() {
-      const nav = document.getElementById("navDesktop");
-      nav.classList.toggle("collapsed");
-    }
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const resultsContainer = document.getElementById("results");
+      resultsContainer.innerHTML = "";
 
-    // Optional: Auto-search on page load with query param
-    window.onload = () => {
-      const params = new URLSearchParams(window.location.search);
-      const query = params.get('query');
-      if (query) {
-        document.getElementById("searchInput").value = query;
-        searchYouTube();
+      if (!data.items.length) {
+        resultsContainer.innerHTML = "<p>No results found.</p>";
+        return;
       }
-    };
-  </script>
+
+      data.items.forEach(item => {
+        const videoId = item.id.videoId;
+        const title = item.snippet.title;
+        const thumbnailUrl = item.snippet.thumbnails.medium.url;
+        const isShort = item.snippet.title.toLowerCase().includes('short');
+
+        const videoElement = `
+          <div class="video" onclick="openModal('${videoId}')">
+            ${isShort ? '<div class="short-label">Short</div>' : ''}
+            <img src="${thumbnailUrl}" alt="${title}">
+            <h4>${title}</h4>
+          </div>
+        `;
+        resultsContainer.innerHTML += videoElement;
+      });
+
+      nextPageToken = data.nextPageToken || '';
+    } catch (error) {
+      console.error("Error fetching YouTube data:", error);
+      document.getElementById("results").innerHTML = "<p>There was an error loading videos.</p>";
+    }
+  }
+
+  async function displayChannelVideos(channelId, channelName) {
+    const channelInfoUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${API_KEY}`;
+    const channelInfoRes = await fetch(channelInfoUrl);
+    const channelInfoData = await channelInfoRes.json();
+
+    if (!channelInfoData.items.length) return;
+
+    const uploadsPlaylistId = channelInfoData.items[0].contentDetails.relatedPlaylists.uploads;
+
+    const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsPlaylistId}&key=${API_KEY}`;
+    const playlistRes = await fetch(playlistUrl);
+    const playlistData = await playlistRes.json();
+
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = `<h2 style="font-size: 22px; margin-bottom: 10px;">Videos by ${channelName}</h2>`;
+
+    playlistData.items.forEach(item => {
+      const videoId = item.snippet.resourceId.videoId;
+      const title = item.snippet.title;
+      const thumbnailUrl = item.snippet.thumbnails.medium.url;
+      const isShort = title.toLowerCase().includes('short');
+
+      const videoElement = `
+        <div class="video" onclick="openModal('${videoId}')">
+          ${isShort ? '<div class="short-label">Short</div>' : ''}
+          <img src="${thumbnailUrl}" alt="${title}">
+          <h4>${title}</h4>
+        </div>
+      `;
+      resultsContainer.innerHTML += videoElement;
+    });
+  }
+
+  function openModal(videoId) {
+    const videoFrame = document.getElementById("videoFrame");
+    videoFrame.src = `https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0`;
+    document.getElementById("videoModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("videoModal").style.display = "none";
+    const videoFrame = document.getElementById("videoFrame");
+    videoFrame.src = "";
+  }
+
+  function toggleNav() {
+    const nav = document.getElementById("navDesktop");
+    nav.classList.toggle("collapsed");
+  }
+
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('query');
+    if (query) {
+      document.getElementById("searchInput").value = query;
+      searchYouTube();
+    }
+  };
+</script>
+
 
 </body>
 </html>

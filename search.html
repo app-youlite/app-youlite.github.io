@@ -77,7 +77,6 @@
       color: #333;
     }
 
-    /* Label for Shorts */
     .short-label {
       position: absolute;
       top: 10px;
@@ -90,7 +89,6 @@
       font-weight: bold;
     }
 
-    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -149,6 +147,7 @@
       height: 100%;
       width: 250px;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      transition: width 0.3s ease;
     }
 
     .nav-desktop a {
@@ -160,6 +159,24 @@
 
     .nav-desktop a:hover {
       background-color: #ddd;
+    }
+
+    .nav-desktop.collapsed {
+      width: 0;
+      padding: 0;
+    }
+
+    .nav-desktop .toggle-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 25px;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .nav-desktop .toggle-btn:hover {
+      color: red;
     }
 
     /* For Desktop */
@@ -191,10 +208,12 @@
   </div>
 
   <!-- Desktop Navigation -->
-  <div class="nav-desktop">
+  <div class="nav-desktop" id="navDesktop">
+    <span class="toggle-btn" onclick="toggleNav()">&#9776;</span>
     <a href="#">Home</a>
     <a href="#">Shorts</a>
     <a href="#">YouTube Music</a>
+    <a href="#">You</a>
     <a href="#">History</a>
     <a href="#">Playlist</a>
     <a href="#">Your Videos</a>
@@ -215,12 +234,13 @@
 
   <script>
     const API_KEY = "AIzaSyC8nKOJX6eDi8v1kKma79F9GxfilpvYclI"; // Replace this with your actual API key
+    let nextPageToken = '';
 
     async function searchYouTube() {
       const query = document.getElementById("searchInput").value.trim();
       if (!query) return;
 
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&q=${encodeURIComponent(query)}&key=${API_KEY}&pageToken=${nextPageToken}`;
 
       try {
         const response = await fetch(url);
@@ -250,6 +270,9 @@
           resultsContainer.innerHTML += videoElement;
         });
 
+        // Store the next page token to fetch more results later
+        nextPageToken = data.nextPageToken || '';
+
       } catch (error) {
         console.error("Error fetching YouTube data:", error);
         document.getElementById("results").innerHTML = "<p>There was an error loading videos.</p>";
@@ -268,6 +291,12 @@
       document.getElementById("videoModal").style.display = "none";
       const videoFrame = document.getElementById("videoFrame");
       videoFrame.src = "";  // Stop the video when the modal closes
+    }
+
+    // Toggle the sidebar (desktop navigation)
+    function toggleNav() {
+      const nav = document.getElementById("navDesktop");
+      nav.classList.toggle("collapsed");
     }
 
     // Optional: Auto-search on page load with query param

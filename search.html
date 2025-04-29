@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>YouLite - Search</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,16 +44,23 @@
       margin: 30px auto;
       max-width: 960px;
       padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Grid layout for video blocks */
+      gap: 20px;
     }
 
     .video {
-      margin-bottom: 30px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 10px;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
+      position: relative;
     }
 
     .video img {
       width: 100%;
-      max-width: 100%;
       height: auto;
       border-radius: 8px;
       transition: transform 0.2s ease-in-out;
@@ -62,9 +70,24 @@
       transform: scale(1.05);
     }
 
-    h4 {
-      margin: 10px 0;
-      font-size: 18px;
+    .video h4 {
+      margin: 10px 0 0;
+      font-size: 16px;
+      text-align: center;
+      color: #333;
+    }
+
+    /* Label for Shorts */
+    .short-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: red;
+      color: white;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
     }
 
     /* Modal Styles */
@@ -102,6 +125,52 @@
       cursor: pointer;
     }
 
+    /* Navigation Styles */
+    .nav-mobile {
+      display: flex;
+      justify-content: space-around;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 10;
+    }
+
+    .nav-desktop {
+      display: none;
+      flex-direction: column;
+      background-color: #f0f0f0;
+      padding: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 250px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-desktop a {
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .nav-desktop a:hover {
+      background-color: #ddd;
+    }
+
+    /* For Desktop */
+    @media (min-width: 768px) {
+      .nav-mobile {
+        display: none;
+      }
+      .nav-desktop {
+        display: flex;
+      }
+    }
   </style>
 </head>
 <body>
@@ -121,6 +190,29 @@
     </div>
   </div>
 
+  <!-- Desktop Navigation -->
+  <div class="nav-desktop">
+    <a href="#">Home</a>
+    <a href="#">Shorts</a>
+    <a href="#">YouTube Music</a>
+    <a href="#">History</a>
+    <a href="#">Playlist</a>
+    <a href="#">Your Videos</a>
+    <a href="#">Watch Later</a>
+    <a href="#">Liked Videos</a>
+    <a href="#">Downloads</a>
+    <a href="#">Your Clips</a>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="nav-mobile">
+    <a href="#">Home</a>
+    <a href="#">Shorts</a>
+    <a href="#">Plus</a>
+    <a href="#">Subscriptions</a>
+    <a href="#">You</a>
+  </div>
+
   <script>
     const API_KEY = "AIzaSyC8nKOJX6eDi8v1kKma79F9GxfilpvYclI"; // Replace this with your actual API key
 
@@ -128,7 +220,7 @@
       const query = document.getElementById("searchInput").value.trim();
       if (!query) return;
 
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`;
 
       try {
         const response = await fetch(url);
@@ -146,9 +238,11 @@
           const videoId = item.id.videoId;
           const title = item.snippet.title;
           const thumbnailUrl = item.snippet.thumbnails.medium.url;
+          const isShort = item.snippet.title.toLowerCase().includes('short'); // Check if the title includes 'short'
 
           const videoElement = `
             <div class="video" onclick="openModal('${videoId}')">
+              ${isShort ? '<div class="short-label">Short</div>' : ''}
               <img src="${thumbnailUrl}" alt="${title}">
               <h4>${title}</h4>
             </div>
